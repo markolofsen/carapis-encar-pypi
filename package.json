@@ -1,0 +1,25 @@
+{
+    "name": "default",
+    "private": true,
+    "scripts": {
+        "commit": "npx openrouter-commit -run",
+        "commit2": "git add . && git commit -m 'fixes' && git push",
+        "docs:build": "mkdocs build -f www/mkdocs.yml",
+        "docs:dev": "mkdocs serve -f www/mkdocs.yml",
+        "tests": "poetry run pytest tests/ -v",
+        "audit": "poetry run pip-audit --group-by=package --group-by-file --ignore=CVE-2024-18266",
+        "make:format": "poetry run black . && yarn make:sort && poetry run flake8 --ignore E203",
+        "make:clean": "rm -rf dist/* build/* *.egg-info",
+        "make:lint": "poetry run flake8 --ignore E203",
+        "make:sort": "poetry run isort .",
+        "preinstall": "rm -rf poetry.lock && poetry install",
+        "make:build": "yarn make:clean && poetry build && poetry run pip install dist/*.whl && poetry run pip show -f encar",
+        "menu": "poetry run python ./devops/menu.py",
+        "debug": "clear && poetry install && poetry run python ./devops/debug.py",
+        "poetry:info": " poetry env info",
+        "poetry": "clear && poetry run python"
+    },
+    "devDependencies": {
+        "openrouter-commit": "latest"
+    }
+}

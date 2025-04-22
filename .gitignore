@@ -1,0 +1,173 @@
+# ========================
+# Python Ignore Rules
+# ========================
+
+# Byte-compiled / optimized / compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Virtual Environments
+env/
+venv/
+.venv/
+env.bak/
+venv.bak/
+.conda/
+.venv.bak/
+.venv_dev/
+# poetry.lock
+
+# Pyenv
+.python-version
+
+# ========================
+# Packaging and Distribution
+# ========================
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+test-pypi-release/
+pypi-release/
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Distutils
+/MANIFEST  # Ignore auto-generated MANIFEST, but keep MANIFEST.in
+
+# Wheel files
+*.whl
+
+# ========================
+# Logs, Debug, and Installer Files
+# ========================
+*.log
+logs/
+debug.log
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ========================
+# Testing & Coverage
+# ========================
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# ========================
+# Secret & Configuration Files
+# ========================
+.env
+.env.*
+
+# ========================
+# macOS & System Files
+# ========================
+.DS_Store
+**/.DS_Store
+.AppleDouble
+.LSOverride
+
+# ========================
+# Editor & IDE Files
+# ========================
+.idea/
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/shelf/
+.idea/**/modules.xml
+.idea/**/misc.xml
+.idea/**/inspectionProfiles/
+.idea/**/deployment.xml
+*.iml
+*.ipr
+*.iws
+# .vscode/
+# .vscode/settings.json
+
+# ========================
+# Jupyter & IPython
+# ========================
+.ipynb_checkpoints/
+.ipython/
+profile_default/
+ipython_config.py
+
+# ========================
+# Django, Flask, Scrapy
+# ========================
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+celerybeat-schedule
+
+# Flask
+instance/
+.webassets-cache
+
+# Scrapy
+.scrapy
+
+# ========================
+# Documentation & Build Tools
+# ========================
+docs/_build/
+target/  # PyBuilder
+
+# ========================
+# Security & Code Analysis
+# ========================
+.bandit/
+
+# ========================
+# Node.js (if applicable)
+# ========================
+node_modules/
+.npm/
+yarn.lock
+package-lock.json
+.pnpm-debug.log
+
+
+# ========================
+# Pypi
+# ========================
+security_reports/
+.safety-project.ini
+
+
+# ========================
+# Cursor
+# ========================
+.cursor/

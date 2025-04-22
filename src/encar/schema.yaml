@@ -1,0 +1,1654 @@
+openapi: 3.0.3
+info:
+  title: Carapis API
+  version: 2.0.0
+  description: |+
+    # Koreancar API – Premium Korean Vehicle Data API
+
+    **Access 130,000+ Korean car listings with structured data from Encar.com.**
+    Automated, up-to-date info on pricing, specs, options, photos, accident history, inspections, and more.
+
+    ---
+
+    ## Quick Start
+
+    - **API Key required:** [Get yours here](https://carapis.com/pricing)
+    - **API Docs:** [Swagger/OpenAPI](https://carapis.com/docs)
+    - **Demo Catalog:** [See live](https://carapis.com/catalog)
+    - **Pricing:** [API plans](https://carapis.com/pricing) | [Marketplace portal](https://carapis.com/buy-portal)
+
+    ---
+
+    ## Official Client Libraries
+
+    - **Python:** [`encar` on PyPI](https://pypi.org/project/encar/)
+      `pip install encar`
+    - **TypeScript/JavaScript:** [`encar` on NPM](https://www.npmjs.com/package/encar)
+      `npm install encar`
+
+    Both libraries support all major API features.
+    TypeScript users get full type definitions for safer development.
+
+    - **TypeScript types schema:** [Download here](https://api.carapis.com/schema/client/)
+
+    ---
+
+    ## Authentication
+
+    All requests require an API key in the header:
+    `Authorization: ApiKey YOUR_API_KEY`
+
+    ---
+
+    ## Example Usage
+
+    **Python:**
+    ```python
+    from encar import CarapisClient
+    client = CarapisClient(api_key="YOUR_API_KEY")
+    vehicles = client.list_vehicles(limit=5)
+    ```
+
+    **TypeScript:**
+    ```typescript
+    import { CarapisClient } from 'encar';
+    const client = new CarapisClient('YOUR_API_KEY');
+    const vehicles = await client.listVehicles({ limit: 5 });
+    ```
+
+    **cURL:**
+    ```bash
+    curl -H "Authorization: ApiKey YOUR_API_KEY" \
+         "https://carapis.com/apix/encar/v2/vehicles/?limit=5"
+    ```
+
+    ---
+
+    ## Plans & Pricing
+
+    - [API pricing plans](https://carapis.com/pricing)
+    - [Ready-to-launch marketplace portal pricing](https://carapis.com/buy-portal)
+
+    ---
+
+    ## Useful Links
+
+    - **API Docs:** [Swagger/OpenAPI](https://carapis.com/docs)
+    - **Demo catalog:** [carapis.com/catalog](https://carapis.com/catalog)
+    - **Contact:** [Telegram](https://t.me/markinmatrix) | [Email](mailto:markolofsen@gmail.com)
+
+paths:
+  /apix/encar/v2/business/dealers/:
+    get:
+      operationId: encar_v2_business_dealers_list
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: type
+        schema:
+          type: string
+          enum:
+          - client
+          - company
+          - dealer
+          - private
+          - repeat
+        description: |-
+          * `dealer` - Dealer
+          * `private` - Private
+          * `company` - Company
+          * `client` - Client
+          * `repeat` - Repeat
+      tags:
+      - Encar Data API
+      security:
+      - jwtAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDealerList'
+          description: ''
+  /apix/encar/v2/business/dealers/{user_id}/:
+    get:
+      operationId: encar_v2_business_dealers_retrieve
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+        description: A unique value identifying this dealer.
+        required: true
+      tags:
+      - Encar Data API
+      security:
+      - jwtAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dealer'
+          description: ''
+  /apix/encar/v2/business/diagnosis-centers/:
+    get:
+      operationId: encar_v2_business_diagnosis_centers_list
+      parameters:
+      - in: query
+        name: dealer
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - Encar Data API
+      security:
+      - jwtAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDiagnosisCenterList'
+          description: ''
+  /apix/encar/v2/business/diagnosis-centers/{code}/:
+    get:
+      operationId: encar_v2_business_diagnosis_centers_retrieve
+      parameters:
+      - in: path
+        name: code
+        schema:
+          type: string
+        description: A unique value identifying this diagnosis center.
+        required: true
+      tags:
+      - Encar Data API
+      security:
+      - jwtAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiagnosisCenter'
+          description: ''
+  /apix/encar/v2/catalog/manufacturers/:
+    get:
+      operationId: encar_v2_catalog_manufacturers_list
+      parameters:
+      - in: query
+        name: country
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - Encar Data API
+      security:
+      - jwtAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedManufacturerList'
+          description: ''
+  /apix/encar/v2/catalog/manufacturers/{code}/:
+    get:
+      operationId: encar_v2_catalog_manufacturers_retrieve
+      parameters:
+      - in: path
+        name: code
+        schema:
+          type: string
+        description: A unique value identifying this manufacturer.
+        required: true
+      tags:
+      - Encar Data API
+      security:
+      - jwtAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Manufacturer'
+          description: ''
+  /apix/encar/v2/catalog/manufacturers/stats/:
+    get:
+      operationId: encar_v2_catalog_manufacturers_stats_retrieve
+      description: Get manufacturer statistics
+      tags:
+      - Encar Data API
+      security:
+      - jwtAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Manufacturer'
+          description: ''
+  /apix/encar/v2/catalog/model-groups/:
+    get:
+      operationId: encar_v2_catalog_model_groups_list
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: manufacturer
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - Encar Data API
+      security:
+      - jwtAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedModelGroupList'
+          description: ''
+  /apix/encar/v2/catalog/model-groups/{id}/:
+    get:
+      operationId: encar_v2_catalog_model_groups_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this model group.
+        required: true
+      tags:
+      - Encar Data API
+      security:
+      - jwtAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelGroup'
+          description: ''
+  /apix/encar/v2/catalog/models/:
+    get:
+      operationId: encar_v2_catalog_models_list
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: model_group
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - Encar Data API
+      security:
+      - jwtAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedVehicleModelList'
+          description: ''
+  /apix/encar/v2/catalog/models/{id}/:
+    get:
+      operationId: encar_v2_catalog_models_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this vehicle model.
+        required: true
+      tags:
+      - Encar Data API
+      security:
+      - jwtAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VehicleModel'
+          description: ''
+  /apix/encar/v2/vehicles/:
+    get:
+      operationId: encar_v2_vehicles_list
+      parameters:
+      - in: query
+        name: body_type
+        schema:
+          type: string
+          nullable: true
+          enum:
+          - large
+          - micro
+          - micro_van
+          - mid
+          - other
+          - rv
+          - semi_mid
+          - small
+          - sports
+          - suv
+          - truck
+          - van
+        description: |-
+          * `rv` - RV
+          * `suv` - SUV
+          * `micro_van` - Micro Van
+          * `micro` - Micro Car
+          * `large` - Large Car
+          * `small` - Small Car
+          * `van` - Van
+          * `semi_mid` - Semi-medium Car
+          * `mid` - Medium Car
+          * `truck` - Truck
+          * `sports` - Sports Car
+          * `other` - Other
+      - in: query
+        name: color
+        schema:
+          type: string
+          nullable: true
+          enum:
+          - beige
+          - black
+          - black_two_tone
+          - blue
+          - bright_silver
+          - brown
+          - brown_two_tone
+          - dark_green
+          - galaxy
+          - gold
+          - gold_two_tone
+          - gray
+          - green
+          - light_blue
+          - light_gold
+          - light_green
+          - maroon
+          - orange
+          - other
+          - pearl
+          - pearl_two_tone
+          - pink
+          - purple
+          - red
+          - silver
+          - silver_gray
+          - silver_two_tone
+          - teal
+          - white
+          - white_two_tone
+          - yellow
+        description: |-
+          * `black` - Black
+          * `red` - Red
+          * `silver` - Silver
+          * `gray` - Gray
+          * `pearl` - Pearl
+          * `blue` - Blue
+          * `white` - White
+          * `green` - Green
+          * `yellow` - Yellow
+          * `orange` - Orange
+          * `pink` - Pink
+          * `purple` - Purple
+          * `brown` - Brown
+          * `gold` - Gold
+          * `beige` - Beige
+          * `light_green` - Light Green
+          * `light_blue` - Light Blue
+          * `maroon` - Maroon
+          * `silver_gray` - Silver Gray
+          * `teal` - Teal
+          * `dark_green` - Dark Green
+          * `bright_silver` - Bright Silver
+          * `light_gold` - Light Gold
+          * `galaxy` - Galaxy
+          * `black_two_tone` - Black Two-Tone
+          * `brown_two_tone` - Brown Two-Tone
+          * `gold_two_tone` - Gold Two-Tone
+          * `silver_two_tone` - Silver Two-Tone
+          * `pearl_two_tone` - Pearl Two-Tone
+          * `white_two_tone` - White Two-Tone
+          * `other` - Other
+      - in: query
+        name: fuel_type
+        schema:
+          type: string
+          nullable: true
+          enum:
+          - cng
+          - diesel
+          - electric
+          - gasoline
+          - gasoline_cng
+          - gasoline_lpg
+          - hybrid
+          - hydrogen
+          - lpg
+          - lpg_electric
+          - none
+          - other
+        description: |-
+          * `none` - Not specified
+          * `gasoline` - Gasoline
+          * `diesel` - Diesel
+          * `lpg` - LPG
+          * `hybrid` - Hybrid
+          * `electric` - Electric
+          * `gasoline_lpg` - Gasoline+LPG
+          * `hydrogen` - Hydrogen
+          * `gasoline_cng` - Gasoline+CNG
+          * `cng` - CNG
+          * `lpg_electric` - LPG+Electric
+          * `other` - Other
+      - in: query
+        name: grade
+        schema:
+          type: string
+      - in: query
+        name: has_accidents
+        schema:
+          type: boolean
+      - in: query
+        name: has_repairs
+        schema:
+          type: boolean
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: manufacturer
+        schema:
+          type: string
+      - in: query
+        name: max_mileage
+        schema:
+          type: integer
+      - in: query
+        name: max_price
+        schema:
+          type: integer
+      - in: query
+        name: max_year
+        schema:
+          type: integer
+      - in: query
+        name: min_mileage
+        schema:
+          type: integer
+      - in: query
+        name: min_price
+        schema:
+          type: integer
+      - in: query
+        name: min_year
+        schema:
+          type: integer
+      - in: query
+        name: model
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: transmission
+        schema:
+          type: string
+          nullable: true
+          enum:
+          - auto
+          - code_001
+          - cvt
+          - manual
+          - other
+          - semi_auto
+        description: |-
+          * `manual` - Manual
+          * `auto` - Automatic
+          * `semi_auto` - Semi-Automatic
+          * `cvt` - CVT
+          * `code_001` - Code 001
+          * `other` - Other
+      - in: query
+        name: vehicle_id
+        schema:
+          type: integer
+      - in: query
+        name: vehicle_no
+        schema:
+          type: string
+      - in: query
+        name: vin
+        schema:
+          type: string
+      - in: query
+        name: warranty_type
+        schema:
+          type: string
+          nullable: true
+          enum:
+          - insurance
+          - none
+          - self
+        description: |-
+          * `none` - Not specified
+          * `insurance` - Insurance
+          * `self` - Self
+      tags:
+      - Encar Data API
+      security:
+      - jwtAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedVehicleListList'
+          description: ''
+  /apix/encar/v2/vehicles/{vehicle_id}/:
+    get:
+      operationId: encar_v2_vehicles_retrieve
+      description: Checks if the user has access to this specific vehicle detail.
+      parameters:
+      - in: path
+        name: vehicle_id
+        schema:
+          type: integer
+        description: A unique value identifying this vehicle.
+        required: true
+      tags:
+      - Encar Data API
+      security:
+      - jwtAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VehicleDetail'
+          description: ''
+  /apix/encar/v2/vehicles/enums/:
+    get:
+      operationId: encar_v2_vehicles_enums_retrieve
+      description: Get all vehicle-related enumerations
+      tags:
+      - Encar Data API
+      security:
+      - jwtAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VehicleDetail'
+          description: ''
+  /apix/encar/v2/vehicles/stats/:
+    get:
+      operationId: encar_v2_vehicles_stats_retrieve
+      description: Get vehicle statistics
+      tags:
+      - Encar Data API
+      security:
+      - jwtAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VehicleDetail'
+          description: ''
+components:
+  schemas:
+    BodyTypeEnum:
+      enum:
+      - rv
+      - suv
+      - micro_van
+      - micro
+      - large
+      - small
+      - van
+      - semi_mid
+      - mid
+      - truck
+      - sports
+      - other
+      type: string
+      description: |-
+        * `rv` - RV
+        * `suv` - SUV
+        * `micro_van` - Micro Van
+        * `micro` - Micro Car
+        * `large` - Large Car
+        * `small` - Small Car
+        * `van` - Van
+        * `semi_mid` - Semi-medium Car
+        * `mid` - Medium Car
+        * `truck` - Truck
+        * `sports` - Sports Car
+        * `other` - Other
+    ColorEnum:
+      enum:
+      - black
+      - red
+      - silver
+      - gray
+      - pearl
+      - blue
+      - white
+      - green
+      - yellow
+      - orange
+      - pink
+      - purple
+      - brown
+      - gold
+      - beige
+      - light_green
+      - light_blue
+      - maroon
+      - silver_gray
+      - teal
+      - dark_green
+      - bright_silver
+      - light_gold
+      - galaxy
+      - black_two_tone
+      - brown_two_tone
+      - gold_two_tone
+      - silver_two_tone
+      - pearl_two_tone
+      - white_two_tone
+      - other
+      type: string
+      description: |-
+        * `black` - Black
+        * `red` - Red
+        * `silver` - Silver
+        * `gray` - Gray
+        * `pearl` - Pearl
+        * `blue` - Blue
+        * `white` - White
+        * `green` - Green
+        * `yellow` - Yellow
+        * `orange` - Orange
+        * `pink` - Pink
+        * `purple` - Purple
+        * `brown` - Brown
+        * `gold` - Gold
+        * `beige` - Beige
+        * `light_green` - Light Green
+        * `light_blue` - Light Blue
+        * `maroon` - Maroon
+        * `silver_gray` - Silver Gray
+        * `teal` - Teal
+        * `dark_green` - Dark Green
+        * `bright_silver` - Bright Silver
+        * `light_gold` - Light Gold
+        * `galaxy` - Galaxy
+        * `black_two_tone` - Black Two-Tone
+        * `brown_two_tone` - Brown Two-Tone
+        * `gold_two_tone` - Gold Two-Tone
+        * `silver_two_tone` - Silver Two-Tone
+        * `pearl_two_tone` - Pearl Two-Tone
+        * `white_two_tone` - White Two-Tone
+        * `other` - Other
+    Dealer:
+      type: object
+      properties:
+        user_id:
+          type: string
+          maxLength: 50
+        code:
+          type: string
+          nullable: true
+          maxLength: 10
+        name:
+          type: string
+          maxLength: 100
+        contact_name:
+          type: string
+          nullable: true
+          maxLength: 100
+        phone:
+          type: string
+          nullable: true
+          maxLength: 20
+        address:
+          type: string
+          nullable: true
+          maxLength: 255
+        type:
+          $ref: '#/components/schemas/DealerTypeEnum'
+        vehicle_count:
+          type: integer
+          readOnly: true
+      required:
+      - name
+      - user_id
+      - vehicle_count
+    DealerTypeEnum:
+      enum:
+      - dealer
+      - private
+      - company
+      - client
+      - repeat
+      type: string
+      description: |-
+        * `dealer` - Dealer
+        * `private` - Private
+        * `company` - Company
+        * `client` - Client
+        * `repeat` - Repeat
+    DiagnosisCenter:
+      type: object
+      properties:
+        code:
+          type: string
+          maxLength: 10
+        name:
+          type: string
+          maxLength: 100
+        address:
+          type: string
+          nullable: true
+          maxLength: 255
+        phone:
+          type: string
+          nullable: true
+          maxLength: 20
+        dealer:
+          allOf:
+          - $ref: '#/components/schemas/Dealer'
+          readOnly: true
+        inspection_count:
+          type: integer
+          readOnly: true
+      required:
+      - code
+      - dealer
+      - inspection_count
+      - name
+    FuelTypeEnum:
+      enum:
+      - none
+      - gasoline
+      - diesel
+      - lpg
+      - hybrid
+      - electric
+      - gasoline_lpg
+      - hydrogen
+      - gasoline_cng
+      - cng
+      - lpg_electric
+      - other
+      type: string
+      description: |-
+        * `none` - Not specified
+        * `gasoline` - Gasoline
+        * `diesel` - Diesel
+        * `lpg` - LPG
+        * `hybrid` - Hybrid
+        * `electric` - Electric
+        * `gasoline_lpg` - Gasoline+LPG
+        * `hydrogen` - Hydrogen
+        * `gasoline_cng` - Gasoline+CNG
+        * `cng` - CNG
+        * `lpg_electric` - LPG+Electric
+        * `other` - Other
+    GradeDetail:
+      type: object
+      properties:
+        code:
+          type: string
+          maxLength: 10
+        name:
+          type: string
+          maxLength: 100
+        name_english:
+          type: string
+          maxLength: 100
+        model:
+          allOf:
+          - $ref: '#/components/schemas/VehicleModel'
+          readOnly: true
+        vehicle_count:
+          type: integer
+          readOnly: true
+      required:
+      - code
+      - model
+      - name
+      - name_english
+      - vehicle_count
+    Manufacturer:
+      type: object
+      properties:
+        code:
+          type: string
+          maxLength: 10
+        name:
+          type: string
+          maxLength: 100
+        name_english:
+          type: string
+          maxLength: 100
+        country:
+          type: string
+          maxLength: 50
+        vehicle_count:
+          type: integer
+          readOnly: true
+      required:
+      - code
+      - name
+      - vehicle_count
+    ModelGroup:
+      type: object
+      properties:
+        code:
+          type: string
+          maxLength: 10
+        name:
+          type: string
+          maxLength: 100
+        name_english:
+          type: string
+          maxLength: 100
+        manufacturer:
+          allOf:
+          - $ref: '#/components/schemas/Manufacturer'
+          readOnly: true
+        vehicle_count:
+          type: integer
+          readOnly: true
+      required:
+      - code
+      - manufacturer
+      - name
+      - vehicle_count
+    NullEnum:
+      enum:
+      - null
+    OdometerStatus34cEnum:
+      enum:
+      - good
+      - bad
+      - normal
+      - none
+      - leakage
+      - minor_leakage
+      type: string
+      description: |-
+        * `good` - Good
+        * `bad` - Bad
+        * `normal` - Normal
+        * `none` - None
+        * `leakage` - Leakage
+        * `minor_leakage` - Minor Leakage
+    OdometerStatusA3eEnum:
+      enum:
+      - none
+      - good
+      - normal
+      - bad
+      type: string
+      description: |-
+        * `none` - Not specified
+        * `good` - Good
+        * `normal` - Normal
+        * `bad` - Bad
+    PaginatedDealerList:
+      type: object
+      required:
+      - count
+      - page
+      - pages
+      - limit
+      - results
+      properties:
+        count:
+          type: integer
+        page:
+          type: integer
+        pages:
+          type: integer
+        limit:
+          type: integer
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Dealer'
+    PaginatedDiagnosisCenterList:
+      type: object
+      required:
+      - count
+      - page
+      - pages
+      - limit
+      - results
+      properties:
+        count:
+          type: integer
+        page:
+          type: integer
+        pages:
+          type: integer
+        limit:
+          type: integer
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiagnosisCenter'
+    PaginatedManufacturerList:
+      type: object
+      required:
+      - count
+      - page
+      - pages
+      - limit
+      - results
+      properties:
+        count:
+          type: integer
+        page:
+          type: integer
+        pages:
+          type: integer
+        limit:
+          type: integer
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Manufacturer'
+    PaginatedModelGroupList:
+      type: object
+      required:
+      - count
+      - page
+      - pages
+      - limit
+      - results
+      properties:
+        count:
+          type: integer
+        page:
+          type: integer
+        pages:
+          type: integer
+        limit:
+          type: integer
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ModelGroup'
+    PaginatedVehicleListList:
+      type: object
+      required:
+      - count
+      - page
+      - pages
+      - limit
+      - results
+      properties:
+        count:
+          type: integer
+        page:
+          type: integer
+        pages:
+          type: integer
+        limit:
+          type: integer
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/VehicleList'
+    PaginatedVehicleModelList:
+      type: object
+      required:
+      - count
+      - page
+      - pages
+      - limit
+      - results
+      properties:
+        count:
+          type: integer
+        page:
+          type: integer
+        pages:
+          type: integer
+        limit:
+          type: integer
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/VehicleModel'
+    PreviousUsageEnum:
+      enum:
+      - business
+      - private
+      type: string
+      description: |-
+        * `business` - Business
+        * `private` - Private
+    TransmissionEnum:
+      enum:
+      - manual
+      - auto
+      - semi_auto
+      - cvt
+      - code_001
+      - other
+      type: string
+      description: |-
+        * `manual` - Manual
+        * `auto` - Automatic
+        * `semi_auto` - Semi-Automatic
+        * `cvt` - CVT
+        * `code_001` - Code 001
+        * `other` - Other
+    VehicleDetail:
+      type: object
+      properties:
+        price:
+          type: integer
+        fuel_type:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/FuelTypeEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        transmission:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/TransmissionEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        vehicle_id:
+          type: integer
+        grade_detail:
+          allOf:
+          - $ref: '#/components/schemas/GradeDetail'
+          readOnly: true
+        model:
+          allOf:
+          - $ref: '#/components/schemas/VehicleModel'
+          readOnly: true
+        year:
+          type: integer
+        mileage:
+          type: integer
+        color:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/ColorEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        main_photo:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Created Date
+        last_import_date:
+          type: string
+          format: date-time
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Updated Date
+        warranty_type:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/WarrantyTypeEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        dealer:
+          allOf:
+          - $ref: '#/components/schemas/Dealer'
+          readOnly: true
+        vin:
+          type: string
+          nullable: true
+          maxLength: 17
+        vehicle_no:
+          type: string
+          nullable: true
+          maxLength: 20
+        first_registration_date:
+          type: string
+          format: date
+          nullable: true
+        displacement:
+          type: integer
+          nullable: true
+        seat_count:
+          type: integer
+          nullable: true
+        body_type:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/BodyTypeEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        odometer_status:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/OdometerStatusA3eEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        vin_status:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/VinStatusA3eEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        photos:
+          type: array
+          items:
+            $ref: '#/components/schemas/VehiclePhoto'
+          readOnly: true
+        options:
+          type: array
+          items:
+            $ref: '#/components/schemas/VehicleOption'
+          readOnly: true
+        inspection:
+          allOf:
+          - $ref: '#/components/schemas/VehicleInspection'
+          readOnly: true
+        history:
+          allOf:
+          - $ref: '#/components/schemas/VehicleHistory'
+          readOnly: true
+        main_data: {}
+        diagnosis_data:
+          nullable: true
+        inspection_data:
+          nullable: true
+        inspection_web_data:
+          nullable: true
+        sellingpoint_data:
+          nullable: true
+        options_data:
+          nullable: true
+      required:
+      - created_at
+      - dealer
+      - grade_detail
+      - history
+      - inspection
+      - main_photo
+      - mileage
+      - model
+      - options
+      - photos
+      - price
+      - updated_at
+      - vehicle_id
+      - year
+    VehicleHistory:
+      type: object
+      properties:
+        vehicle:
+          type: integer
+        first_registration:
+          type: string
+          format: date
+        owner_changes:
+          type: integer
+        plate_changes:
+          type: integer
+        total_accidents:
+          type: integer
+        owner_accidents:
+          type: integer
+        total_loss_count:
+          type: integer
+        flood_damage_count:
+          type: integer
+        previous_usage:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/PreviousUsageEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        has_commercial_use:
+          type: boolean
+        has_rental_use:
+          type: boolean
+      required:
+      - first_registration
+      - vehicle
+    VehicleInspection:
+      type: object
+      properties:
+        vehicle:
+          type: integer
+        center:
+          allOf:
+          - $ref: '#/components/schemas/DiagnosisCenter'
+          readOnly: true
+        inspector_name:
+          type: string
+          nullable: true
+          maxLength: 100
+        inspection_date:
+          type: string
+          format: date-time
+        performance_number:
+          type: string
+          nullable: true
+          maxLength: 50
+        has_accidents:
+          type: boolean
+        has_repairs:
+          type: boolean
+        odometer_status:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/OdometerStatus34cEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        vin_status:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/VinStatus34cEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        engine_status: {}
+        transmission_status: {}
+        electrical_status: {}
+        brake_status: {}
+        steering_status: {}
+        inspector_notes:
+          type: string
+          nullable: true
+      required:
+      - center
+      - inspection_date
+      - vehicle
+    VehicleList:
+      type: object
+      properties:
+        vehicle_id:
+          type: integer
+        model:
+          allOf:
+          - $ref: '#/components/schemas/VehicleModel'
+          readOnly: true
+        grade_detail:
+          allOf:
+          - $ref: '#/components/schemas/GradeDetail'
+          readOnly: true
+        year:
+          type: integer
+        mileage:
+          type: integer
+        price:
+          type: integer
+        fuel_type:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/FuelTypeEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        transmission:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/TransmissionEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        color:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/ColorEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        main_photo:
+          type: string
+          readOnly: true
+        warranty_type:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/WarrantyTypeEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Created Date
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Updated Date
+        last_import_date:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - created_at
+      - grade_detail
+      - main_photo
+      - mileage
+      - model
+      - price
+      - updated_at
+      - vehicle_id
+      - year
+    VehicleModel:
+      type: object
+      properties:
+        code:
+          type: string
+          maxLength: 10
+        name:
+          type: string
+          maxLength: 100
+        name_english:
+          type: string
+          maxLength: 100
+        model_group:
+          allOf:
+          - $ref: '#/components/schemas/ModelGroup'
+          readOnly: true
+        vehicle_count:
+          type: integer
+          readOnly: true
+      required:
+      - code
+      - model_group
+      - name
+      - name_english
+      - vehicle_count
+    VehicleOption:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        code:
+          type: string
+          maxLength: 10
+        name:
+          type: string
+          maxLength: 200
+        price:
+          type: integer
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        type:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/VehicleOptionTypeEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        is_standard:
+          type: boolean
+        is_factory:
+          type: boolean
+      required:
+      - code
+      - id
+      - name
+    VehicleOptionTypeEnum:
+      enum:
+      - standard
+      - choice
+      - tuning
+      type: string
+      description: |-
+        * `standard` - Standard
+        * `choice` - Choice
+        * `tuning` - Tuning
+    VehiclePhoto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        code:
+          type: string
+          maxLength: 10
+        path:
+          type: string
+          maxLength: 200
+        type:
+          $ref: '#/components/schemas/VehiclePhotoTypeEnum'
+        description:
+          type: string
+          nullable: true
+        image_url:
+          type: string
+          readOnly: true
+      required:
+      - code
+      - id
+      - image_url
+      - path
+      - type
+    VehiclePhotoTypeEnum:
+      enum:
+      - inner
+      - outer
+      - option
+      - thumbnail
+      type: string
+      description: |-
+        * `inner` - Interior
+        * `outer` - Exterior
+        * `option` - Option
+        * `thumbnail` - Thumbnail
+    VinStatus34cEnum:
+      enum:
+      - good
+      - bad
+      - normal
+      - none
+      - leakage
+      - minor_leakage
+      type: string
+      description: |-
+        * `good` - Good
+        * `bad` - Bad
+        * `normal` - Normal
+        * `none` - None
+        * `leakage` - Leakage
+        * `minor_leakage` - Minor Leakage
+    VinStatusA3eEnum:
+      enum:
+      - none
+      - good
+      - normal
+      - bad
+      type: string
+      description: |-
+        * `none` - Not specified
+        * `good` - Good
+        * `normal` - Normal
+        * `bad` - Bad
+    WarrantyTypeEnum:
+      enum:
+      - none
+      - insurance
+      - self
+      type: string
+      description: |-
+        * `none` - Not specified
+        * `insurance` - Insurance
+        * `self` - Self
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    tokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Token-based authentication with required prefix "Token"
