@@ -271,15 +271,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedManufacturerList'
           description: ''
-  /apix/encar/v2/catalog/manufacturers/{code}/:
+  /apix/encar/v2/catalog/manufacturers/{slug}/:
     get:
       operationId: encar_v2_catalog_manufacturers_retrieve
       parameters:
       - in: path
-        name: code
+        name: slug
         schema:
           type: string
-        description: A unique value identifying this manufacturer.
         required: true
       tags:
       - Encar Data API
@@ -322,7 +321,7 @@ paths:
         schema:
           type: integer
       - in: query
-        name: manufacturer
+        name: manufacturer__slug
         schema:
           type: string
       - name: ordering
@@ -356,15 +355,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedModelGroupList'
           description: ''
-  /apix/encar/v2/catalog/model-groups/{id}/:
+  /apix/encar/v2/catalog/model-groups/{slug}/:
     get:
       operationId: encar_v2_catalog_model_groups_retrieve
       parameters:
       - in: path
-        name: id
+        name: slug
         schema:
-          type: integer
-        description: A unique integer value identifying this model group.
+          type: string
         required: true
       tags:
       - Encar Data API
@@ -390,9 +388,9 @@ paths:
         schema:
           type: integer
       - in: query
-        name: model_group
+        name: model_group__slug
         schema:
-          type: integer
+          type: string
       - name: ordering
         required: false
         in: query
@@ -424,15 +422,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedVehicleModelList'
           description: ''
-  /apix/encar/v2/catalog/models/{id}/:
+  /apix/encar/v2/catalog/models/{slug}/:
     get:
       operationId: encar_v2_catalog_models_retrieve
       parameters:
       - in: path
-        name: id
+        name: slug
         schema:
-          type: integer
-        description: A unique integer value identifying this vehicle model.
+          type: string
         required: true
       tags:
       - Encar Data API
@@ -582,18 +579,6 @@ paths:
           * `cng` - CNG
           * `lpg_electric` - LPG+Electric
           * `other` - Other
-      - in: query
-        name: grade
-        schema:
-          type: string
-      - in: query
-        name: has_accidents
-        schema:
-          type: boolean
-      - in: query
-        name: has_repairs
-        schema:
-          type: boolean
       - name: limit
         required: false
         in: query
@@ -601,7 +586,7 @@ paths:
         schema:
           type: integer
       - in: query
-        name: manufacturer
+        name: manufacturer_slug
         schema:
           type: string
       - in: query
@@ -629,7 +614,11 @@ paths:
         schema:
           type: integer
       - in: query
-        name: model
+        name: model_group_slug
+        schema:
+          type: string
+      - in: query
+        name: model_slug
         schema:
           type: string
       - name: ordering
@@ -669,31 +658,6 @@ paths:
           * `cvt` - CVT
           * `code_001` - Code 001
           * `other` - Other
-      - in: query
-        name: vehicle_id
-        schema:
-          type: integer
-      - in: query
-        name: vehicle_no
-        schema:
-          type: string
-      - in: query
-        name: vin
-        schema:
-          type: string
-      - in: query
-        name: warranty_type
-        schema:
-          type: string
-          nullable: true
-          enum:
-          - insurance
-          - none
-          - self
-        description: |-
-          * `none` - Not specified
-          * `insurance` - Insurance
-          * `self` - Self
       tags:
       - Encar Data API
       security:
@@ -974,10 +938,7 @@ components:
           maxLength: 10
         name:
           type: string
-          maxLength: 100
-        name_english:
-          type: string
-          maxLength: 100
+          readOnly: true
         model:
           allOf:
           - $ref: '#/components/schemas/VehicleModel'
@@ -989,7 +950,6 @@ components:
       - code
       - model
       - name
-      - name_english
       - vehicle_count
     Manufacturer:
       type: object
@@ -999,19 +959,21 @@ components:
           maxLength: 10
         name:
           type: string
-          maxLength: 100
-        name_english:
-          type: string
-          maxLength: 100
+          readOnly: true
         country:
           type: string
           maxLength: 50
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
         vehicle_count:
           type: integer
           readOnly: true
       required:
       - code
       - name
+      - slug
       - vehicle_count
     ModelGroup:
       type: object
@@ -1021,10 +983,11 @@ components:
           maxLength: 10
         name:
           type: string
-          maxLength: 100
-        name_english:
+          readOnly: true
+        slug:
           type: string
-          maxLength: 100
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
         manufacturer:
           allOf:
           - $ref: '#/components/schemas/Manufacturer'
@@ -1036,6 +999,7 @@ components:
       - code
       - manufacturer
       - name
+      - slug
       - vehicle_count
     NullEnum:
       enum:
@@ -1221,59 +1185,59 @@ components:
     VehicleDetail:
       type: object
       properties:
-        price:
-          type: integer
+        main_photo:
+          type: string
+          readOnly: true
+        warranty_type:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/WarrantyTypeEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        grade_detail:
+          allOf:
+          - $ref: '#/components/schemas/GradeDetail'
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Updated Date
         fuel_type:
           nullable: true
           oneOf:
           - $ref: '#/components/schemas/FuelTypeEnum'
           - $ref: '#/components/schemas/NullEnum'
-        transmission:
-          nullable: true
-          oneOf:
-          - $ref: '#/components/schemas/TransmissionEnum'
-          - $ref: '#/components/schemas/NullEnum'
-        vehicle_id:
-          type: integer
-        grade_detail:
-          allOf:
-          - $ref: '#/components/schemas/GradeDetail'
-          readOnly: true
-        model:
-          allOf:
-          - $ref: '#/components/schemas/VehicleModel'
-          readOnly: true
         year:
-          type: integer
-        mileage:
           type: integer
         color:
           nullable: true
           oneOf:
           - $ref: '#/components/schemas/ColorEnum'
           - $ref: '#/components/schemas/NullEnum'
-        main_photo:
+        last_import_date:
           type: string
-          readOnly: true
+          format: date-time
+          nullable: true
         created_at:
           type: string
           format: date-time
           readOnly: true
           title: Created Date
-        last_import_date:
-          type: string
-          format: date-time
-          nullable: true
-        updated_at:
-          type: string
-          format: date-time
-          readOnly: true
-          title: Updated Date
-        warranty_type:
+        mileage:
+          type: integer
+        transmission:
           nullable: true
           oneOf:
-          - $ref: '#/components/schemas/WarrantyTypeEnum'
+          - $ref: '#/components/schemas/TransmissionEnum'
           - $ref: '#/components/schemas/NullEnum'
+        price:
+          type: integer
+        vehicle_id:
+          type: integer
+        model:
+          allOf:
+          - $ref: '#/components/schemas/VehicleModel'
+          readOnly: true
         dealer:
           allOf:
           - $ref: '#/components/schemas/Dealer'
@@ -1507,10 +1471,11 @@ components:
           maxLength: 10
         name:
           type: string
-          maxLength: 100
-        name_english:
+          readOnly: true
+        slug:
           type: string
-          maxLength: 100
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
         model_group:
           allOf:
           - $ref: '#/components/schemas/ModelGroup'
@@ -1522,7 +1487,7 @@ components:
       - code
       - model_group
       - name
-      - name_english
+      - slug
       - vehicle_count
     VehicleOption:
       type: object

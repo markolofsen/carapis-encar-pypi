@@ -18,30 +18,31 @@ class CarapisClientError(Exception):
 
 class CarapisClient:
     """
-    Python client for the Carapis Encar v2 API.
+    Python client parser for the Carapis Encar v2 API.
     Loads API definitions from schema.yaml.
     Uses BASE_URL defined in config.py.
     """
 
-    def __init__(self, api_key: str):
-        """Initialize the client.
+    def __init__(self, api_key: Optional[str] = None):
+        """Initialize the client parser.
 
         Args:
-            api_key: Your Carapis API key.
+            api_key: Your Carapis API key (optional). If not provided,
+                     the client operates in free tier mode (limited access).
         """
-        if not api_key:
-            raise ValueError("api_key cannot be empty.")
-
         # Use BASE_URL from config, ensure no trailing slash
         self.base_url = BASE_URL.rstrip('/')
         self.api_key = api_key
         # Define the specific API path part we are interested in
         self.api_base_path = "/apix/encar/v2"
+
+        # Conditionally set headers
         self._headers = {
             "Accept": "application/json",
-            "Authorization": f"ApiKey {self.api_key}",
             "User-Agent": f"CarapisClientPython/{self._get_version()}"  # Include version
         }
+        if self.api_key:  # Add Authorization only if key is provided
+            self._headers["Authorization"] = f"ApiKey {self.api_key}"
 
         try:
             with open(_SCHEMA_PATH, 'r', encoding='utf-8') as f:
@@ -106,7 +107,7 @@ class CarapisClient:
                  path_params: Optional[Dict[str, Any]] = None,
                  query_params: Optional[Dict[str, Any]] = None,
                  json_data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Helper method to make authenticated requests."""
+        """Helper method to make requests (potentially unauthenticated)."""
         # Substitute path parameters
         formatted_path = endpoint_path_template
         if path_params:
@@ -131,7 +132,7 @@ class CarapisClient:
             response = requests.request(
                 method,
                 url,
-                headers=self._headers,
+                headers=self._headers,  # Use headers (which might not have Authorization)
                 params=actual_query_params,
                 json=json_data,
                 timeout=30
@@ -258,11 +259,10 @@ class CarapisClient:
         # No kwargs to handle
         return self._call_endpoint('encar_v2_catalog_manufacturers_list', **params)
 
-    def get_manufacturer(self, code: str) -> Dict[str, Any]:
+    def get_manufacturer(self, slug: str) -> Dict[str, Any]:
         """ Corresponds to operationId: encar_v2_catalog_manufacturers_retrieve """
         params = locals()
         params.pop('self')
-        # No kwargs to handle
         return self._call_endpoint('encar_v2_catalog_manufacturers_retrieve', **params)
 
     def get_manufacturer_stats(self) -> Dict[str, Any]:
@@ -274,71 +274,63 @@ class CarapisClient:
         return self._call_endpoint('encar_v2_catalog_manufacturers_stats_retrieve', **params)
 
     def list_model_groups(self, limit: Optional[int] = None,
-                          manufacturer: Optional[str] = None,
+                          manufacturer__slug: Optional[str] = None,
                           ordering: Optional[str] = None,
                           page: Optional[int] = None,
                           search: Optional[str] = None) -> Dict[str, Any]:
         """ Corresponds to operationId: encar_v2_catalog_model_groups_list """
         params = locals()
         params.pop('self')
-        # No kwargs to handle
-        return self._call_endpoint('encar_v2_catalog_model_groups_list', **params)
+        # No manual mapping needed, _prepare_params handles schema parameter names
+        call_kwargs = {k: v for k, v in params.items() if v is not None}
+        return self._call_endpoint('encar_v2_catalog_model_groups_list', **call_kwargs)
 
-    def get_model_group(self, code: str) -> Dict[str, Any]:
+    def get_model_group(self, slug: str) -> Dict[str, Any]:
         """ Corresponds to operationId: encar_v2_catalog_model_groups_retrieve """
         params = locals()
         params.pop('self')
-        # No kwargs to handle
         return self._call_endpoint('encar_v2_catalog_model_groups_retrieve', **params)
 
     def list_models(self, limit: Optional[int] = None,
-                    model_group: Optional[str] = None,
+                    model_group__slug: Optional[str] = None,
                     ordering: Optional[str] = None,
                     page: Optional[int] = None,
                     search: Optional[str] = None) -> Dict[str, Any]:
         """ Corresponds to operationId: encar_v2_catalog_models_list """
         params = locals()
         params.pop('self')
-        # No kwargs to handle
-        return self._call_endpoint('encar_v2_catalog_models_list', **params)
+        # No manual mapping needed, _prepare_params handles schema parameter names
+        call_kwargs = {k: v for k, v in params.items() if v is not None}
+        return self._call_endpoint('encar_v2_catalog_models_list', **call_kwargs)
 
-    def get_model(self, code: str) -> Dict[str, Any]:
+    def get_model(self, slug: str) -> Dict[str, Any]:
         """ Corresponds to operationId: encar_v2_catalog_models_retrieve """
         params = locals()
         params.pop('self')
-        # No kwargs to handle
         return self._call_endpoint('encar_v2_catalog_models_retrieve', **params)
 
     def list_vehicles(self, body_type: Optional[str] = None, color: Optional[str] = None,
-                      fuel_type: Optional[str] = None, grade: Optional[str] = None,
-                      has_accidents: Optional[bool] = None, has_repairs: Optional[bool] = None,
-                      limit: Optional[int] = None, manufacturer: Optional[str] = None,
+                      fuel_type: Optional[str] = None,
+                      limit: Optional[int] = None,
+                      manufacturer_slug: Optional[str] = None,
                       max_mileage: Optional[int] = None, max_price: Optional[int] = None,
                       max_year: Optional[int] = None, min_mileage: Optional[int] = None,
                       min_price: Optional[int] = None, min_year: Optional[int] = None,
-                      model: Optional[str] = None,
-                      model_group: Optional[str] = None,
+                      model_group_slug: Optional[str] = None,
+                      model_slug: Optional[str] = None,
                       ordering: Optional[str] = None,
                       page: Optional[int] = None, search: Optional[str] = None,
-                      transmission: Optional[str] = None, vehicle_id: Optional[int] = None,
-                      vehicle_no: Optional[str] = None, vin: Optional[str] = None,
-                      warranty_type: Optional[str] = None) -> Dict[str, Any]:
+                      transmission: Optional[str] = None) -> Dict[str, Any]:
         """ Corresponds to operationId: encar_v2_vehicles_list """
         # Collect all parameters passed to the function
         params = locals()
         params.pop('self')  # Remove 'self' from parameters
 
-        # Prepare arguments for _call_endpoint, potentially renaming model_group
-        call_kwargs = {}
-        for key, value in params.items():
-            if key == 'model_group' and value is not None:
-                # Map the function argument 'model_group' to the query parameter 'model__model_group'
-                call_kwargs['model__model_group'] = value
-            elif value is not None:
-                # Pass other non-None parameters as is
-                call_kwargs[key] = value
+        # Prepare arguments for _call_endpoint using _prepare_params which reads schema
+        # No special mapping needed here anymore
+        call_kwargs = {k: v for k, v in params.items() if v is not None}
 
-        # Important: Pass the modified kwargs to _call_endpoint
+        # Important: Pass the filtered kwargs to _call_endpoint
         return self._call_endpoint('encar_v2_vehicles_list', **call_kwargs)
 
     def get_vehicle(self, vehicle_id: int) -> Dict[str, Any]:

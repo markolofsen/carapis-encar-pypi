@@ -4,15 +4,15 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "encar"
-version = "0.1.3"
-description = "encar is the official Python client for Carapis Encar API. Use it to access, search, and analyze real-time Korean used car data from Encar.com via a powerful REST API. Supports vehicle listings, details, manufacturers, models, and more."
+version = "0.1.4"
+description = "encar is the official Python client parser for Carapis Encar API. Use this parser library to access, search, and analyze real-time Korean used car data from Encar.com via a powerful REST API. Supports vehicle listings, details, manufacturers, models, and more."
 authors = [ "Carapis.com <info@carapis.com>",]
 license = "MIT"
 readme = "README.md"
 homepage = "https://carapis.com/"
 repository = "https://github.com/markolofsen/carapis-encar-pypi"
 documentation = "https://carapis.com/"
-keywords = [ "encar", "encar api", "carapis", "korean car api", "used car api", "vehicle data", "car marketplace", "car listing", "client", "automotive",]
+keywords = [ "encar", "encar api", "carapis", "korean car api", "used car api", "vehicle data", "car marketplace", "car listing", "client", "automotive", "parser", "encar parser", "data parser",]
 classifiers = [ "Development Status :: 4 - Beta", "Intended Audience :: Developers", "License :: OSI Approved :: MIT License", "Operating System :: OS Independent", "Programming Language :: Python :: 3", "Programming Language :: Python :: 3.11", "Topic :: Internet :: WWW/HTTP :: Dynamic Content", "Topic :: Software Development :: Libraries :: Python Modules",]
 include = [ "src/encar/*.py", "src/encar/schema.yaml", "LICENSE", "README.md", "src/examples/*.py", "src/examples/.env.example",]
 exclude = [ "**/__pycache__", "**/.pytest_cache", "**/venv", "**/.venv", "**/dist", "**/build", "**/*.egg-info", "**/.env",]

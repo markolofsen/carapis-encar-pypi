@@ -3,7 +3,6 @@ import sys
 import json
 import shutil
 import logging
-from dotenv import load_dotenv
 from typing import Optional, Any, Dict, Tuple
 from pathlib import Path
 from encar import CarapisClient, CarapisClientError
@@ -11,11 +10,6 @@ from encar import CarapisClient, CarapisClientError
 # --- Setup Path --- >
 THIS_DIR = Path(__file__).parent
 DOWNLOADS_DIR = THIS_DIR / "downloads"
-PROJECT_ROOT = THIS_DIR.parent.parent.parent
-
-load_dotenv(
-    PROJECT_ROOT / ".env"
-)
 
 
 class EncarApiRunner:
@@ -183,12 +177,15 @@ class EncarApiRunner:
 
         return fetched_dealer_id, fetched_diag_center_code
 
-    def _run_catalog_endpoints(self) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+    def _run_catalog_endpoints(self) -> Tuple[Optional[str], Optional[str], Optional[str], Optional[str], Optional[str], Optional[str]]:
         """Runs API calls related to manufacturers, model groups, and models."""
         self.logger.info("--- Running Catalog Endpoints ---")
         fetched_manufacturer_code = None
+        fetched_manufacturer_slug = None
         fetched_model_group_code = None
+        fetched_model_group_slug = None
         fetched_model_code = None
+        fetched_model_slug = None
         res = None  # Initialize res
 
         # List Manufacturers
@@ -202,23 +199,25 @@ class EncarApiRunner:
             self.logger.info(f"SUCCESS: {method_name}")
             self._save_result(method_name, args_dict, res)
             if res and res.get('results') and len(res['results']) > 0:
-                fetched_manufacturer_code = res['results'][0].get('code')
-                self.logger.info(f"---> Fetched manufacturer code: {fetched_manufacturer_code}")
+                first_mfr = res['results'][0]
+                fetched_manufacturer_code = first_mfr.get('code')
+                fetched_manufacturer_slug = first_mfr.get('slug')
+                self.logger.info(f"---> Fetched manufacturer code: {fetched_manufacturer_code}, slug: {fetched_manufacturer_slug}")
             else:
-                self.logger.warning("---> Could not fetch manufacturer code from list_manufacturers.")
+                self.logger.warning("---> Could not fetch manufacturer data from list_manufacturers.")
         except CarapisClientError as e:
             self.logger.error(f"FAILED (API Error): {method_name} - {e}")
         except Exception as e:
             self.logger.error(f"FAILED (Unexpected Error): {method_name} - {type(e).__name__}: {e}")
 
-        if fetched_manufacturer_code:
-            # Get Manufacturer
+        if fetched_manufacturer_slug:
+            # Get Manufacturer using slug
             method_name = "get_manufacturer"
-            args_dict = {"code": fetched_manufacturer_code}  # For saving
-            self.logger.info(f"Calling: {method_name} with code='{fetched_manufacturer_code}'")
+            args_dict = {"slug": fetched_manufacturer_slug}
+            self.logger.info(f"Calling: {method_name} with slug='{fetched_manufacturer_slug}'")
             try:
-                # Explicit argument
-                res_mfr = self.client.get_manufacturer(code=fetched_manufacturer_code)
+                # Explicit argument using slug
+                res_mfr = self.client.get_manufacturer(slug=fetched_manufacturer_slug)
                 self.logger.info(f"SUCCESS: {method_name}")
                 self._save_result(method_name, args_dict, res_mfr)
             except CarapisClientError as e:
@@ -226,28 +225,71 @@ class EncarApiRunner:
             except Exception as e:
                 self.logger.error(f"FAILED (Unexpected Error): {method_name} - {type(e).__name__}: {e}")
 
-            # List Model Groups
+            # List Model Groups using manufacturer__slug
             method_name = "list_model_groups"
             limit_arg, ordering_arg = 2, "name"
-            args_dict = {"manufacturer": fetched_manufacturer_code, "limit": limit_arg, "ordering": ordering_arg}  # For saving
+            args_dict = {"manufacturer__slug": fetched_manufacturer_slug, "limit": limit_arg, "ordering": ordering_arg}
             res_mg = None
-            self.logger.info(f"Calling: {method_name} with manufacturer='{fetched_manufacturer_code}', limit={limit_arg}, ordering='{ordering_arg}'")
+            self.logger.info(f"Calling: {method_name} with manufacturer__slug='{fetched_manufacturer_slug}', limit={limit_arg}, ordering='{ordering_arg}'")
             try:
-                # Explicit arguments
-                res_mg = self.client.list_model_groups(manufacturer=fetched_manufacturer_code, limit=limit_arg, ordering=ordering_arg)
+                # Explicit arguments using manufacturer__slug
+                res_mg = self.client.list_model_groups(manufacturer__slug=fetched_manufacturer_slug, limit=limit_arg, ordering=ordering_arg)
                 self.logger.info(f"SUCCESS: {method_name}")
                 self._save_result(method_name, args_dict, res_mg)
                 if res_mg and res_mg.get('results') and len(res_mg['results']) > 0:
-                    fetched_model_group_code = res_mg['results'][0].get('code')
-                    self.logger.info(f"---> Fetched model group code: {fetched_model_group_code}")
+                    first_mg = res_mg['results'][0]
+                    fetched_model_group_code = first_mg.get('code')
+                    fetched_model_group_slug = first_mg.get('slug')
+                    self.logger.info(f"---> Fetched model group code: {fetched_model_group_code}, slug: {fetched_model_group_slug}")
                 else:
-                    self.logger.warning("---> Could not fetch model group code from list_model_groups.")
+                    self.logger.warning("---> Could not fetch model group data from list_model_groups.")
             except CarapisClientError as e:
                 self.logger.error(f"FAILED (API Error): {method_name} - {e}")
             except Exception as e:
                 self.logger.error(f"FAILED (Unexpected Error): {method_name} - {type(e).__name__}: {e}")
+
+            # Get Model Group using slug
+            if fetched_model_group_slug:
+                method_name = "get_model_group"
+                args_dict = {"slug": fetched_model_group_slug}
+                self.logger.info(f"Calling: {method_name} with slug='{fetched_model_group_slug}'")
+                try:
+                    # Explicit argument using slug
+                    res_get_mg = self.client.get_model_group(slug=fetched_model_group_slug)
+                    self.logger.info(f"SUCCESS: {method_name}")
+                    self._save_result(method_name, args_dict, res_get_mg)
+                except CarapisClientError as e:
+                    self.logger.error(f"FAILED (API Error): {method_name} - {e}")
+                except Exception as e:
+                    self.logger.error(f"FAILED (Unexpected Error): {method_name} - {type(e).__name__}: {e}")
+            else:
+                self.logger.warning("Skipping get_model_group - No slug fetched.")
+
+            # List Models using model_group__slug
+            if fetched_model_group_slug:
+                method_name = "list_models"
+                limit_arg = 2
+                args_dict = {"model_group__slug": fetched_model_group_slug, "limit": limit_arg}
+                res_mdl = None
+                self.logger.info(f"Calling: {method_name} with model_group__slug='{fetched_model_group_slug}', limit={limit_arg}")
+                try:
+                    # Explicit arguments using model_group__slug
+                    res_mdl = self.client.list_models(model_group__slug=fetched_model_group_slug, limit=limit_arg)
+                    self.logger.info(f"SUCCESS: {method_name}")
+                    self._save_result(method_name, args_dict, res_mdl)
+                    if res_mdl and res_mdl.get('results') and len(res_mdl['results']) > 0:
+                        first_mdl = res_mdl['results'][0]
+                        fetched_model_code = first_mdl.get('code')
+                        fetched_model_slug = first_mdl.get('slug')
+                        self.logger.info(f"---> Fetched model code: {fetched_model_code}, slug: {fetched_model_slug}")
+                    else:
+                        self.logger.warning("---> Could not fetch model data from list_models.")
+                except CarapisClientError as e:
+                    self.logger.error(f"FAILED (API Error): {method_name} - {e}")
+                except Exception as e:
+                    self.logger.error(f"FAILED (Unexpected Error): {method_name} - {type(e).__name__}: {e}")
         else:
-            self.logger.warning("Skipping manufacturer-dependent catalog calls - No manufacturer code fetched.")
+            self.logger.warning("Skipping manufacturer-dependent catalog calls - No manufacturer slug fetched.")
 
         # Get Manufacturer Stats (Known to fail currently)
         method_name = "get_manufacturer_stats"
@@ -263,52 +305,14 @@ class EncarApiRunner:
         except Exception as e:
             self.logger.error(f"FAILED (Unexpected Error): {method_name} - {type(e).__name__}: {e}")
 
-        if fetched_model_group_code:
-            # Get Model Group
-            method_name = "get_model_group"
-            args_dict = {"code": fetched_model_group_code}  # For saving
-            self.logger.info(f"Calling: {method_name} with code='{fetched_model_group_code}'")
-            try:
-                # Explicit argument
-                res_get_mg = self.client.get_model_group(code=fetched_model_group_code)
-                self.logger.info(f"SUCCESS: {method_name}")
-                self._save_result(method_name, args_dict, res_get_mg)
-            except CarapisClientError as e:
-                self.logger.error(f"FAILED (API Error): {method_name} - {e}")
-            except Exception as e:
-                self.logger.error(f"FAILED (Unexpected Error): {method_name} - {type(e).__name__}: {e}")
-
-            # List Models
-            method_name = "list_models"
-            limit_arg = 2
-            args_dict = {"model_group": fetched_model_group_code, "limit": limit_arg}  # For saving
-            res_mdl = None
-            self.logger.info(f"Calling: {method_name} with model_group='{fetched_model_group_code}', limit={limit_arg}")
-            try:
-                # Explicit arguments
-                res_mdl = self.client.list_models(model_group=fetched_model_group_code, limit=limit_arg)
-                self.logger.info(f"SUCCESS: {method_name}")
-                self._save_result(method_name, args_dict, res_mdl)
-                if res_mdl and res_mdl.get('results') and len(res_mdl['results']) > 0:
-                    fetched_model_code = res_mdl['results'][0].get('code')
-                    self.logger.info(f"---> Fetched model code: {fetched_model_code}")
-                else:
-                    self.logger.warning("---> Could not fetch model code from list_models.")
-            except CarapisClientError as e:
-                self.logger.error(f"FAILED (API Error): {method_name} - {e}")
-            except Exception as e:
-                self.logger.error(f"FAILED (Unexpected Error): {method_name} - {type(e).__name__}: {e}")
-        else:
-            self.logger.warning("Skipping model group-dependent catalog calls - No model group code fetched.")
-
-        if fetched_model_code:
-            # Get Model
+        if fetched_model_slug:
+            # Get Model using slug
             method_name = "get_model"
-            args_dict = {"code": fetched_model_code}  # For saving
-            self.logger.info(f"Calling: {method_name} with code='{fetched_model_code}'")
+            args_dict = {"slug": fetched_model_slug}
+            self.logger.info(f"Calling: {method_name} with slug='{fetched_model_slug}'")
             try:
-                # Explicit argument
-                res_get_mdl = self.client.get_model(code=fetched_model_code)
+                # Explicit argument using slug
+                res_get_mdl = self.client.get_model(slug=fetched_model_slug)
                 self.logger.info(f"SUCCESS: {method_name}")
                 self._save_result(method_name, args_dict, res_get_mdl)
             except CarapisClientError as e:
@@ -316,11 +320,11 @@ class EncarApiRunner:
             except Exception as e:
                 self.logger.error(f"FAILED (Unexpected Error): {method_name} - {type(e).__name__}: {e}")
         else:
-            self.logger.warning("Skipping get_model - No model code fetched.")
+            self.logger.warning("Skipping get_model - No model slug fetched.")
 
-        return fetched_manufacturer_code, fetched_model_group_code, fetched_model_code
+        return fetched_manufacturer_code, fetched_model_group_code, fetched_model_code, fetched_manufacturer_slug, fetched_model_group_slug, fetched_model_slug
 
-    def _run_vehicle_endpoints(self, fetched_manufacturer_code: Optional[str], fetched_model_group_code: Optional[str]):
+    def _run_vehicle_endpoints(self, fetched_manufacturer_slug: Optional[str], fetched_model_group_slug: Optional[str]):
         """Runs API calls related to vehicles."""
         self.logger.info("--- Running Vehicle Endpoints ---")
         fetched_vehicle_id = None
@@ -329,10 +333,10 @@ class EncarApiRunner:
         # List Vehicles (simple, to get an ID)
         method_name = "list_vehicles_for_id"
         limit_arg, ordering_arg = 1, "-created_at"
-        args_dict = {"limit": limit_arg, "ordering": ordering_arg}  # For saving
+        args_dict = {"limit": limit_arg, "ordering": ordering_arg}
         self.logger.info(f"Calling: {method_name} with limit={limit_arg}, ordering='{ordering_arg}'")
         try:
-            # Explicit arguments
+            # Explicit arguments, remove obsolete ones
             res_list = self.client.list_vehicles(limit=limit_arg, ordering=ordering_arg)
             self.logger.info(f"SUCCESS: {method_name}")
             self._save_result(method_name, args_dict, res_list)
@@ -347,42 +351,41 @@ class EncarApiRunner:
             self.logger.error(f"FAILED (Unexpected Error): {method_name} - {type(e).__name__}: {e}")
 
         # --- Additional List Examples ---
-        if fetched_manufacturer_code:
-            method_name_base = "list_vehicles_by_manufacturer"
-            method_name_save = f"list_vehicles_by_{fetched_manufacturer_code}"  # Filename
+        if fetched_manufacturer_slug:
+            method_name_base = "list_vehicles_by_manufacturer_slug"
+            method_name_save = f"list_vehicles_by_{fetched_manufacturer_slug}"  # Filename
             limit_arg = 2
-            args_dict = {"limit": limit_arg, "manufacturer": fetched_manufacturer_code}  # For saving
-            self.logger.info(f"Calling: {method_name_base} with limit={limit_arg}, manufacturer='{fetched_manufacturer_code}'")
+            args_dict = {"limit": limit_arg, "manufacturer_slug": fetched_manufacturer_slug}
+            self.logger.info(f"Calling: {method_name_base} with limit={limit_arg}, manufacturer_slug='{fetched_manufacturer_slug}'")
             try:
-                # Explicit arguments
-                res_mfr_list = self.client.list_vehicles(limit=limit_arg, manufacturer=fetched_manufacturer_code)
-                self.logger.info(f"SUCCESS: {method_name_base} for {fetched_manufacturer_code}")
+                # Explicit arguments using slug
+                res_mfr_list = self.client.list_vehicles(limit=limit_arg, manufacturer_slug=fetched_manufacturer_slug)
+                self.logger.info(f"SUCCESS: {method_name_base} for {fetched_manufacturer_slug}")
                 self._save_result(method_name_save, args_dict, res_mfr_list)
             except CarapisClientError as e:
-                self.logger.error(f"FAILED (API Error): {method_name_base} for {fetched_manufacturer_code} - {e}")
+                self.logger.error(f"FAILED (API Error): {method_name_base} for {fetched_manufacturer_slug} - {e}")
             except Exception as e:
-                self.logger.error(f"FAILED (Unexpected Error): {method_name_base} for {fetched_manufacturer_code} - {type(e).__name__}: {e}")
+                self.logger.error(f"FAILED (Unexpected Error): {method_name_base} for {fetched_manufacturer_slug} - {type(e).__name__}: {e}")
 
-        if fetched_manufacturer_code and fetched_model_group_code:
-            # NOTE: model_group filter is now handled by the client library
-            method_name_base = "list_vehicles_by_manufacturer_model_group"
-            method_name_save = f"list_vehicles_{fetched_manufacturer_code}_{fetched_model_group_code}"  # Filename
+        if fetched_manufacturer_slug and fetched_model_group_slug:
+            method_name_base = "list_vehicles_by_manufacturer_model_group_slug"
+            method_name_save = f"list_vehicles_{fetched_manufacturer_slug}_{fetched_model_group_slug}"  # Filename
             limit_arg = 2
-            args_dict = {"limit": limit_arg, "manufacturer": fetched_manufacturer_code, "model_group": fetched_model_group_code}  # For saving
-            self.logger.info(f"Attempting {method_name_base} with limit={limit_arg}, manufacturer='{fetched_manufacturer_code}', model_group='{fetched_model_group_code}'")
+            args_dict = {"limit": limit_arg, "manufacturer_slug": fetched_manufacturer_slug, "model_group_slug": fetched_model_group_slug}
+            self.logger.info(f"Attempting {method_name_base} with limit={limit_arg}, manufacturer_slug='{fetched_manufacturer_slug}', model_group_slug='{fetched_model_group_slug}'")
             try:
-                # Explicit arguments
-                res_mfr_mg_list = self.client.list_vehicles(limit=limit_arg, manufacturer=fetched_manufacturer_code, model_group=fetched_model_group_code)
-                self.logger.info(f"SUCCESS: {method_name_base} for {fetched_manufacturer_code}/{fetched_model_group_code}")
+                # Explicit arguments using slugs
+                res_mfr_mg_list = self.client.list_vehicles(limit=limit_arg, manufacturer_slug=fetched_manufacturer_slug, model_group_slug=fetched_model_group_slug)
+                self.logger.info(f"SUCCESS: {method_name_base} for {fetched_manufacturer_slug}/{fetched_model_group_slug}")
                 self._save_result(method_name_save, args_dict, res_mfr_mg_list)
             except CarapisClientError as e:
-                self.logger.error(f"FAILED (API Error): {method_name_base} for {fetched_manufacturer_code}/{fetched_model_group_code} - {e}")
+                self.logger.error(f"FAILED (API Error): {method_name_base} for {fetched_manufacturer_slug}/{fetched_model_group_slug} - {e}")
             except Exception as e:
-                self.logger.error(f"FAILED (Unexpected Error): {method_name_base} for {fetched_manufacturer_code}/{fetched_model_group_code} - {type(e).__name__}: {e}")
+                self.logger.error(f"FAILED (Unexpected Error): {method_name_base} for {fetched_manufacturer_slug}/{fetched_model_group_slug} - {type(e).__name__}: {e}")
 
         method_name = "list_vehicles_year_2022"
         limit_arg, min_year_arg, max_year_arg = 2, 2022, 2022
-        args_dict = {"limit": limit_arg, "min_year": min_year_arg, "max_year": max_year_arg}  # For saving
+        args_dict = {"limit": limit_arg, "min_year": min_year_arg, "max_year": max_year_arg}
         self.logger.info(f"Calling: {method_name} with limit={limit_arg}, min_year={min_year_arg}, max_year={max_year_arg}")
         try:
             # Explicit arguments
@@ -444,8 +447,8 @@ class EncarApiRunner:
         """Executes the full sequence of API calls."""
         self.logger.info("=== Starting Encar API Run ===")
         _, _ = self._run_business_endpoints()
-        mfr_code, mg_code, _ = self._run_catalog_endpoints()
-        self._run_vehicle_endpoints(mfr_code, mg_code)
+        _, _, _, mfr_slug, mg_slug, _ = self._run_catalog_endpoints()
+        self._run_vehicle_endpoints(mfr_slug, mg_slug)
         self.logger.info("=== Finished Encar API Run ===")
 
 
